@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 public class Bill extends BaseModel{
     private Ticket ticket;
-    private Long exitGate;
+    private Gate exitGate;
     private double amount;
     private Date exitTime;
     private List<Payment> payments;

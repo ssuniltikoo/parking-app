@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class Operator extends BaseModel{
     private String operatorName;
-    private Long operatorId;
+    private Gate gate;
 
 }

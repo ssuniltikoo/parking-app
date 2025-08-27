@@ -15,8 +15,8 @@ import java.util.Set;
 @Setter
 public class ParkingLot  extends BaseModel{
     private List<ParkingFloor> parkingFloors;
-    private List<Long> entryGates;
-    private List<Long> exitGates;
+    private List<Gate> entryGates;
+    private List<Gate> exitGates;
     private ParkingSlotStatus parkingSlotStatus;
     private Set<VehicleType> allowedVehicleTypes;
     private Map<VehicleType,Integer> capacityByVehicleType;

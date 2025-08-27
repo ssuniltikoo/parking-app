@@ -8,7 +8,7 @@ import projects.system.design.dev.parkinglotapp.models.enums.GateType;
 
 @Getter
 @Setter
-public class Long extends BaseModel {
+public class Gate extends BaseModel {
     private String GateNumber;
     private GateStatus gateStatus;
     private GateType gateType;

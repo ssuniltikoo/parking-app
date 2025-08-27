@@ -1,9 +1,11 @@
 package projects.system.design.dev.parkinglotapp.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import projects.system.design.dev.parkinglotapp.exception.GateNotFoundException;
+import projects.system.design.dev.parkinglotapp.factory.SlotAssignmentStrategyFactory;
 import projects.system.design.dev.parkinglotapp.models.*;
-import projects.system.design.dev.parkinglotapp.models.Long;
+import projects.system.design.dev.parkinglotapp.models.Gate;
 import projects.system.design.dev.parkinglotapp.models.enums.ParkingSlotStatus;
 import projects.system.design.dev.parkinglotapp.models.enums.VehicleType;
 import projects.system.design.dev.parkinglotapp.repositories.GateRepository;
@@ -15,6 +17,7 @@ import projects.system.design.dev.parkinglotapp.services.interfaces.TicketSystem
 import java.util.Date;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class TicketService  implements TicketSystem {
     private static final int parkingLotId = 1;
@@ -30,52 +33,53 @@ public class TicketService  implements TicketSystem {
         this.vehicleRepository = vehicleRepository;
         this.parkingLotRepository = parkingLotRepository;
     }
-
-    public Ticket issueTicket(java.lang.Long gateId, String licencePlateNumber, String ownerName, VehicleType vehicleType) throws GateNotFoundException {
-        Ticket ticket = new Ticket();
-        ticket.setEntryTime(new Date());
-       Optional<Long> gate = gateRepository.findGateByGateId(gateId);
-        if(gate.isEmpty()){
-            throw new GateNotFoundException("Please enter valid gate number");
-        }
-        ticket.setEntryGate(gate.get());
-
-        Optional<Vehicle> optionalVehicle = vehicleRepository.findVehicleByVehicleNumber(licencePlateNumber);
-        Vehicle vehicleInfo = null;
-        if(optionalVehicle.isEmpty()){
-            vehicleInfo = new Vehicle();
-            vehicleInfo.setVehicleNumber(licencePlateNumber);
-            vehicleInfo.setOwnerName(ownerName);
-            vehicleInfo.setVehicleType(vehicleType);
-            vehicleRepository.save(vehicleInfo);
-        }else{
-            vehicleInfo = optionalVehicle.get();
-        }
-        ticket.setVehicle(vehicleInfo);
-
-        Optional<ParkingLot> optionalParkingLot  = parkingLotRepository.getParkingLot(parkingLotId);
-        if(optionalParkingLot.isEmpty()){
-            throw new RuntimeException("Invalid Parking Lot");
-        }
-
-        ParkingLot parkingLot = optionalParkingLot.get();
-
-       ParkingSlot slot =  parkingLot.
-               getSlotAssignmentStrategy()
-               .assignSlot(parkingLot,vehicleType);
-       slot.setParkingSlotStatus(ParkingSlotStatus.FILLED);
-       ticket.setParkingSlot(slot);
-       Ticket t =  ticketRepository.save(ticket);
-        return t;
-    }
+//
+//    public Ticket issueTicket(java.lang.Long gateId, String licencePlateNumber, String ownerName, VehicleType vehicleType) throws GateNotFoundException {
+//        Ticket ticket = new Ticket();
+//        ticket.setEntryTime(new Date());
+//       Optional<Gate> gate = gateRepository.findGateByGateId(gateId);
+//        if(gate.isEmpty()){
+//            throw new GateNotFoundException("Please enter valid gate number");
+//        }
+//        ticket.setEntryGate(gate.get());
+//
+//        Optional<Vehicle> optionalVehicle = vehicleRepository.findVehicleByVehicleNumber(licencePlateNumber);
+//        Vehicle vehicleInfo = null;
+//        if(optionalVehicle.isEmpty()){
+//            vehicleInfo = new Vehicle();
+//            vehicleInfo.setVehicleNumber(licencePlateNumber);
+//            vehicleInfo.setOwnerName(ownerName);
+//            vehicleInfo.setVehicleType(vehicleType);
+//            vehicleRepository.save(vehicleInfo);
+//        }else{
+//            vehicleInfo = optionalVehicle.get();
+//        }
+//        ticket.setVehicle(vehicleInfo);
+//
+//        Optional<ParkingLot> optionalParkingLot  = parkingLotRepository.getParkingLot(parkingLotId);
+//        if(optionalParkingLot.isEmpty()){
+//            throw new RuntimeException("Invalid Parking Lot");
+//        }
+//
+//        ParkingLot parkingLot = optionalParkingLot.get();
+//
+//       ParkingSlot slot =  parkingLot.
+//               getSlotAssignmentStrategy()
+//               .assignSlot(parkingLot,vehicleType);
+//       slot.setParkingSlotStatus(ParkingSlotStatus.FILLED);
+//       ticket.setParkingSlot(slot);
+//       Ticket t =  ticketRepository.save(ticket);
+//        return t;
+//    }
 
     @Override
-    public Ticket issueTicket(VehicleType type, Long entryGate, String licencePlateNumber) {
+    public Ticket issueTicket(VehicleType type, Long entryGateId, String licencePlateNumber) {
 
         Ticket ticket = new Ticket();
         ticket.setEntryTime(new Date());
-        Optional<Long> gate = gateRepository.findGateByGateId(entryGate.getId());
+        Optional<Gate> gate = gateRepository.findGateByGateId(entryGateId);
         if(gate.isEmpty()){
+            log.error("invalid gate id");
             throw new RuntimeException("Please enter valid gate number");
         }
         ticket.setEntryGate(gate.get());
@@ -95,10 +99,13 @@ public class TicketService  implements TicketSystem {
 
         Optional<ParkingLot> optionalParkingLot  = parkingLotRepository.getParkingLot(parkingLotId);
         if(optionalParkingLot.isEmpty()){
+            log.info("invalid parkinf lot");
             throw new RuntimeException("Invalid Parking Lot");
         }
 
         ParkingLot parkingLot = optionalParkingLot.get();
+
+
 
         ParkingSlot slot =  parkingLot.
                 getSlotAssignmentStrategy()

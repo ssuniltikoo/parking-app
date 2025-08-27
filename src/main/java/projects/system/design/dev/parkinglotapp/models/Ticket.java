@@ -11,7 +11,7 @@ import java.util.Date;
 public class Ticket extends BaseModel{
     private Vehicle vehicle;
     private Date entryTime;
-    private Long entryGate;
+    private Gate entryGate;
     private String ticketNumber;
     private ParkingSlot parkingSlot;
 }

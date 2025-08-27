@@ -1,5 +1,8 @@
 package projects.system.design.dev.parkinglotapp.controllers;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,18 +22,18 @@ public class TicketController {
     }
 
     @PostMapping("/ticket")
-    public TicketResponse issueTicket(@RequestBody TicketRequest request) {
+    public ResponseEntity<TicketResponse> issueTicket(@RequestBody TicketRequest request) {
         TicketResponse response = new TicketResponse();
         try{
 //            ParkingAvailabilityChecker checker =
-         Ticket t = ticketSystem.issueTicket(request.getVehicleType(),request.getGateId(),request.getVehicleType());
+         Ticket t = ticketSystem.issueTicket(request.getVehicleType(),request.getGateId(),request.getVehicleNumber());
          response.setTicket(t);
          response.setStatus(TicketResponseStatus.SUCCESS);
-         return response;
+         return new ResponseEntity<>(response,HttpStatus.CREATED);
         }catch (Exception e) {
             response.setStatus(TicketResponseStatus.FAILURE);
         }
-        return response;
+        return  new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
     }
 
 }
