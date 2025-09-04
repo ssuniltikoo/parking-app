@@ -105,8 +105,6 @@ public class TicketService  implements TicketSystem {
 
         ParkingLot parkingLot = optionalParkingLot.get();
 
-
-
         ParkingSlot slot =  parkingLot.
                 getSlotAssignmentStrategy()
                 .assignSlot(parkingLot,type);
